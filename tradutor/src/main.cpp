@@ -26,24 +26,18 @@ int main(int argc, char** argv) {
         cout << "Something wrong happened during pre-processing\n";
         return -1;
     }
-    pp.writeOutput();
-    Assembler assembler(fileName, pp.getOutput());
 
-    err = assembler.firstPass();
+    Translator translator(fileName, pp.getOutput());
+
+    err = translator.translate();
     if (err) {
-        cout << "first pass error: " + assembler.getErrorMessage() << std::endl;
+        cout << "error during translation: " + translator.getErrorMessage() << std::endl;
         return -1;
     }
 
-    err = assembler.secondPass();
+    err = translator.writeOutput();
     if (err) {
-        cout << "second pass error: " + assembler.getErrorMessage() << std::endl;
-        return -1;
-    }
-
-    err = assembler.writeOutput();
-    if (err) {
-        cout << "write error: " + assembler.getErrorMessage() << std::endl;
+        cout << "error during writing: " + translator.getErrorMessage() << std::endl;
         return -1;
     }
 
