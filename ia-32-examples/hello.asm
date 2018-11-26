@@ -9,7 +9,8 @@ section .data
 section .text
 global _start
             ; print msg
-_start:     mov eax, 4
+_start:
+            mov eax, 4
             mov ebx, 1
             mov ecx, msg
             mov edx, msgSize

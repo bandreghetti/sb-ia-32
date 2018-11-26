@@ -18,12 +18,6 @@ class Translator {
         std::string fileName;
         std::list<std::tuple<int, std::list<std::string>>> srcLines;
         std::list<std::string> outLines;
-        std::map<std::string, int> symbolsMap;
-        std::set<std::string> externSymbols;
-        std::list<std::tuple<std::string, int>> useTable;
-        std::list<std::tuple<std::string, int>> definitionTable;
-        std::list<unsigned int> relative;
-        std::list<short> machineCode;
         bool isModule = false;
         enum {
             ADD = 1,
@@ -68,7 +62,6 @@ class Translator {
         int error = 0;
         std::string errMsg;
         std::string genErrMsg(int, std::string);
-        void handleArgument(int, std::list<std::string>::iterator*, std::list<std::string>::iterator, int*);
     public:
         Translator(std::string, std::list<std::tuple<int, std::list<std::string>>>);
         int printSource();

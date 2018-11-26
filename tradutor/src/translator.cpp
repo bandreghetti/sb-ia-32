@@ -27,7 +27,7 @@ int Translator::writeOutput() {
     std::ofstream outFile;
     outFile.open(fileName + ".s");
 
-    outFile << "; Auto-generated from " + fileName + ".asm";
+    outFile << "; Auto-generated from " + fileName + ".asm\n";
 
     for (auto line : outLines) {
         outFile << line + '\n';
@@ -71,7 +71,7 @@ int Translator::translate() {
             // Change the section variable according to the second token
             if (line.back() == "TEXT") {
                 section = TEXT;
-                outLines.push_back(".section text");
+                outLines.push_back("section .text");
                 if (!hadText) {
                     outLines.push_back("global _start");
                     outLines.push_back("_start:");
@@ -79,10 +79,10 @@ int Translator::translate() {
                 hadText = true;
             } else if (line.back() == "DATA") {
                 section = DATA;
-                outLines.push_back(".section data");
+                outLines.push_back("section .data");
             } else if (line.back() == "BSS") {
                 section = BSS;
-                outLines.push_back(".section bss");
+                outLines.push_back("section .bss");
             } else {
                 errMsg = genErrMsg(lineCount, "unknown section name " + line.back());
                 error = 1;
@@ -163,12 +163,96 @@ int Translator::translate() {
                     return error;
                 }
                 outLine += "sub eax, dword[" + *nextTokenIt + "]";
+            } else if (token == "JMP") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "jmp " + *nextTokenIt;
+            } else if (token == "JMPN") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "cmp eax, 0\n";
+                outLine += "jl " + *nextTokenIt;
+            } else if (token == "JMPP") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "cmp eax, 0\n";
+                outLine += "jg " + *nextTokenIt;
+            } else if (token == "JMPZ") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "cmp eax, 0\n";
+                outLine += "je " + *nextTokenIt;
+            } else if (token == "COPY") {
+                auto firstOpIt = std::next(tokenIt);
+                if (firstOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto secondOpIt = std::next(firstOpIt);
+                if (secondOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto firstOp = *firstOpIt;
+                auto secondOp = *secondOpIt;
+
+                // Remove comma if needed
+                if (isSuffix(firstOp, ",")) {
+                    (firstOp).pop_back();
+                }
+
+                outLine += "mov ebx, dword[" + secondOp + "]\n";
+                outLine += "mov [" + firstOp + "], ebx";
+            } else if (token == "LOAD") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "mov eax, dword[" + *nextTokenIt + "]";
+            } else if (token == "STORE") {
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "mov [" + *nextTokenIt + "], eax";
+            } else if (token == "STOP") {
+                outLine += "mov eax, 1\n";
+                outLine += "mov ebx, 0\n";
+                outLine += "int 80h";
             } else if (token == "MULT") {
+                // TODO
             } else if (token == "DIV") {
+                // TODO
+            } else if (token == "INPUT") {
+                // TODO
+            } else if (token == "OUTPUT") {
+                // TODO
+            } else if (token == "C_INPUT") {
+                // TODO
+            } else if (token == "C_OUTPUT") {
+                // TODO
+            } else if (token == "S_INPUT") {
+                // TODO
+            } else if (token == "S_OUTPUT") {
+                // TODO
             } else {
                 // Invalid instruction
-                // errMsg = genErrMsg(lineCount, "unknown instruction/directive " + token);
-                // return error;
+                errMsg = genErrMsg(lineCount, "unknown instruction/directive " + token);
+                return error;
             }
         }
 
@@ -198,73 +282,4 @@ int Translator::getError() {
 std::string Translator::genErrMsg(int lineCount, std::string message) {
     error = 1;
     return "line " + std::to_string(lineCount) + ": " + message;
-}
-
-void Translator::handleArgument(int lineCount, std::list<std::string>::iterator* tokenItPtr, std::list<std::string>::iterator lineEnd, int* memCountPtr) {
-    auto operand = **tokenItPtr;
-
-    // Check if operator is COPY (takes two arguments, need to handle comma)
-    bool isCopy = false;
-    if (*std::prev(*tokenItPtr) == "COPY") {
-        isCopy = true;
-        // Remove comma if needed
-        if (isSuffix(operand, ",")) {
-            operand.pop_back();
-        }
-    }
-
-    // Check if argument is defined in symbols map
-    if (symbolsMap.count(operand) == 0) {
-        errMsg = genErrMsg(lineCount, "unknown symbol " + operand);
-        error = 1;
-        return;
-    }
-    auto memOperand = symbolsMap.at(operand);
-
-    // Handle LABEL + N case
-    if (std::next(*tokenItPtr) != lineEnd && symbolsMap.count(*std::next(*tokenItPtr)) == 0) {
-        ++*tokenItPtr;
-        // Check if next token is a +
-        auto plusSign = **tokenItPtr;
-        if (plusSign != "+") {
-            if (isCopy) {
-                errMsg = genErrMsg(lineCount, "expecting + or known symbol, found " + plusSign);
-            } else {
-                errMsg = genErrMsg(lineCount, "expecting + or newline, found " + plusSign);
-            }
-            error = 1;
-            return;
-        }
-        // Check if there is a token after +
-        if (std::next(*tokenItPtr) == lineEnd) {
-            errMsg = genErrMsg(lineCount, "expecting decimal number, found newline");
-            error = 1;
-            return;
-        }
-        ++*tokenItPtr;
-        auto N = **tokenItPtr;
-        // Handle comma if necessary
-        if (isCopy && isSuffix(N, ",")) {
-            N.pop_back();
-        }
-        // Check if token after + is a valid number
-        if (!std::regex_match(N, natRegEx)) {
-            errMsg = genErrMsg(lineCount, "expecting decimal number, found " + N);
-            error = 1;
-            return;
-        }
-        // Since everything went ok, increment memOperand
-        memOperand += std::atoi(N.c_str());
-    }
-    // Include relative symbol address to machine code
-    machineCode.push_back(memOperand);
-    // If operand is an extern symbol, add its address to use table
-    if (externSymbols.count(operand) > 0) {
-        auto useTuple = std::make_tuple(operand, *memCountPtr);
-        useTable.push_back(useTuple);
-    // Else, add its address to relative list
-    } else {
-        relative.push_back(*memCountPtr);
-    }
-    ++*memCountPtr;
 }
