@@ -9,8 +9,9 @@ SECTION TEXT
         PUSH ECX
         MOV ECX, DWORD[ESB+12]
         INT 0X80
-        CMP DWORD[ECX], 0XA
-        INC ECX
+	MOV EAX, ECX
+	INC ECX
+        CMP BYTE[ECX], 0XA
         MOV DWORD[ESP+12], ECX
         POP ECX
         LOOPNE L1
