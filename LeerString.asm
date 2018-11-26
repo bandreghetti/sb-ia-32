@@ -7,7 +7,7 @@ SECTION TEXT
     MOV ECX, 100
     L1: MOV EAX, 3
         PUSH ECX
-        MOV ECX, DWORD[ESB+12]
+        MOV ECX, DWORD[ESP+12]
         INT 0X80
 	MOV EAX, ECX
 	INC ECX
@@ -16,7 +16,7 @@ SECTION TEXT
         POP ECX
         LOOPNE L1
     LEAVE 
-    RET 0
+    RET 4
 SECTION DATA
 SECTION BSS
     LABEL: SPACE  
