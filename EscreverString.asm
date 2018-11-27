@@ -1,12 +1,12 @@
 SECTION TEXT    
     PUSH LABEL
-    CALL LeerString
-    LeerString:
+    CALL EscreverString
+    EscreverString: 
         ENTER 0,0
-        MOV EBX, 0
+        MOV EBX, 1
         MOV EDX, 1
         MOV ECX, 100
-        L1: MOV EAX, 3
+        L1: MOV EAX, 4
             PUSH ECX
             MOV ECX, DWORD[ESP+12]
             INT 0X80
