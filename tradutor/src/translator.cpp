@@ -365,11 +365,19 @@ int Translator::translate() {
             } else if (procedure == "C_INPUT") {
                 procLines += "C_INPUT:\n";
                 procLines += "enter 0,0\n";
-
+                procLines += "mov ecx, [ebp+8]\n";
+                procLines += "mov eax, 3\n";
+                procLines += "mov ebx, 0\n";
+                procLines += "mov edx, 1\n";
+                procLines += "int 0x80\n";
             } else if (procedure == "C_OUTPUT") {
                 procLines += "C_OUTPUT:\n";
                 procLines += "enter 0,0\n";
-
+                procLines += "mov ecx, [ebp+8]\n";
+                procLines += "mov eax, 4\n";
+                procLines += "mov ebx, 1\n";
+                procLines += "mov edx, 1\n";
+                procLines += "int 0x80\n";
             } else if (procedure == "S_INPUT") {
                 procLines += "S_INPUT:\n";
                 procLines += "enter 0,0\n";
