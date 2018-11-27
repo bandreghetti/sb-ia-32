@@ -382,11 +382,36 @@ int Translator::translate() {
             } else if (procedure == "S_INPUT") {
                 procLines += "S_INPUT:\n";
                 procLines += "enter 0,0\n";
-
+                procLines += "mov ebx, 0\n";
+                procLines += "mov edx, 1\n";
+                procLines += "mov ecx, dword[ebp+12]\n";
+                procLines += "sin_l1: mov eax, 3\n";
+                procLines += "push ecx\n";
+                procLines += "mov ecx, dword[esp+12]\n";
+                procLines += "int 0x80\n";
+                procLines += "mov eax, ecx\n";
+                procLines += "inc ecx\n";
+                procLines += "cmp byte[ecx], 0xa\n";
+                procLines += "mov dword[esp+12], ecx\n";
+                procLines += "pop ecx\n";
+                procLines += "loopne sin_l1\n";
             } else if (procedure == "S_OUTPUT") {
                 procLines += "S_OUTPUT:\n";
                 procLines += "enter 0,0\n";
-
+                procLines += "mov ebx, 1\n";
+                procLines += "mov edx, 1\n";
+                procLines += "mov ecx, dword [ebp+12]\n";
+                procLines += "sout_l1: \n";
+                procLines += "mov eax, 4\n";
+                procLines += "push ecx\n";
+                procLines += "mov ecx, dword[esp+12]\n";
+                procLines += "int 0x80\n";
+                procLines += "mov eax, ecx\n";
+                procLines += "inc ecx\n";
+                procLines += "cmp byte[ecx], 0xa\n";
+                procLines += "mov dword[esp+12], ecx\n";
+                procLines += "pop ecx\n";
+                procLines += "loopne sout_l1\n";
             }
             procLines += "leave\n";
             procLines += "ret";
