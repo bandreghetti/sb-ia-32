@@ -5,7 +5,7 @@ SECTION TEXT
         ENTER 0,0
         MOV EBX, 1
         MOV EDX, 1
-        MOV ECX, 100
+        MOV ECX, DWORD [EBP+12]
         L1: MOV EAX, 4
             PUSH ECX
             MOV ECX, DWORD[ESP+12]
@@ -17,7 +17,7 @@ SECTION TEXT
             POP ECX
             LOOPNE L1
         LEAVE 
-        RET 4
+        RET 8
 SECTION DATA
 SECTION BSS
     LABEL: SPACE  
