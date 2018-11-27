@@ -6,12 +6,13 @@ SECTION TEXT
         MOV EBX, 1
         MOV EDX, 1
         MOV ECX, DWORD [EBP+12]
-        L1: MOV EAX, 4
+        L1: 
+            MOV EAX, 4
             PUSH ECX
             MOV ECX, DWORD[ESP+12]
             INT 0X80
-        MOV EAX, ECX
-        INC ECX
+            MOV EAX, ECX
+            INC ECX
             CMP BYTE[ECX], 0XA
             MOV DWORD[ESP+12], ECX
             POP ECX
