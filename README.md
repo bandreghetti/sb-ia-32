@@ -1,5 +1,8 @@
 # Assembly UnB -> Assembly IA-32
 
+Bruno Andreghetti Dantas - 150007060
+Sara Gomes Cardoso - 150021712
+
 To compile the translator, run:
 
 ```bash
