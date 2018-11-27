@@ -234,21 +234,104 @@ int Translator::translate() {
                 outLine += "mov ebx, 0\n";
                 outLine += "int 80h";
             } else if (token == "MULT") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "mov ebx, dword[" + *nextTokenIt + "]\n";
+                outLine += "imul ebx";
             } else if (token == "DIV") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "mov ebx, dword[" + *nextTokenIt + "]\n";
+                outLine += "cdq\n";
+                outLine += "idiv ebx";
             } else if (token == "INPUT") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "push " + *nextTokenIt + "\n";
+                outLine += "call INPUT";
+                includeProcedures.insert("INPUT");
             } else if (token == "OUTPUT") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "push " + *nextTokenIt + "\n";
+                outLine += "call OUTPUT";
+                includeProcedures.insert("OUTPUT");
             } else if (token == "C_INPUT") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "push " + *nextTokenIt + "\n";
+                outLine += "call C_INPUT";
+                includeProcedures.insert("C_INPUT");
             } else if (token == "C_OUTPUT") {
-                // TODO
+                auto nextTokenIt = std::next(tokenIt);
+                if (nextTokenIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                outLine += "push " + *nextTokenIt + "\n";
+                outLine += "call C_OUTPUT";
+                includeProcedures.insert("C_OUTPUT");
             } else if (token == "S_INPUT") {
-                // TODO
+                auto firstOpIt = std::next(tokenIt);
+                if (firstOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto secondOpIt = std::next(firstOpIt);
+                if (secondOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto firstOp = *firstOpIt;
+                auto secondOp = *secondOpIt;
+
+                // Remove comma if needed
+                if (isSuffix(firstOp, ",")) {
+                    (firstOp).pop_back();
+                }
+
+                outLine += "push " + firstOp + "\n";
+                outLine += "push " + secondOp + "\n";
+                outLine += "call S_INPUT";
+                includeProcedures.insert("S_INPUT");
             } else if (token == "S_OUTPUT") {
-                // TODO
+                auto firstOpIt = std::next(tokenIt);
+                if (firstOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto secondOpIt = std::next(firstOpIt);
+                if (secondOpIt == line.end()) {
+                    errMsg = genErrMsg(lineCount, "expecting label, found newline");
+                    return error;
+                }
+                auto firstOp = *firstOpIt;
+                auto secondOp = *secondOpIt;
+
+                // Remove comma if needed
+                if (isSuffix(firstOp, ",")) {
+                    (firstOp).pop_back();
+                }
+
+                outLine += "push " + firstOp + "\n";
+                outLine += "push " + secondOp + "\n";
+                outLine += "call S_OUTPUT";
+                includeProcedures.insert("S_OUTPUT");
             } else {
                 // Invalid instruction
                 errMsg = genErrMsg(lineCount, "unknown instruction/directive " + token);
@@ -266,6 +349,34 @@ int Translator::translate() {
         errMsg = "TEXT section not found";
         error = 1;
         return error;
+    }
+
+    if (!includeProcedures.empty()) {
+        outLines.push_back("section .text");
+        for (auto procedure : includeProcedures) {
+            std::string procLines;
+            if (procedure == "INPUT") {
+                procLines += "INPUT:\n";
+
+            } else if (procedure == "OUTPUT") {
+                procLines += "OUTPUT:\n";
+
+            } else if (procedure == "C_INPUT") {
+                procLines += "C_INPUT:\n";
+
+            } else if (procedure == "C_OUTPUT") {
+                procLines += "C_OUTPUT:\n";
+
+            } else if (procedure == "S_INPUT") {
+                procLines += "S_INPUT:\n";
+
+            } else if (procedure == "S_OUTPUT") {
+                procLines += "S_OUTPUT:\n";
+
+            }
+            procLines += "ret";
+            outLines.push_back(procLines);
+        }
     }
 
     return 0;

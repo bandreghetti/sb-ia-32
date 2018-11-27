@@ -6,7 +6,7 @@
 #include <string>
 #include <tuple>
 #include <regex>
-#include <set>
+#include <unordered_set>
 
 #include <utils.hpp>
 
@@ -18,50 +18,10 @@ class Translator {
         std::string fileName;
         std::list<std::tuple<int, std::list<std::string>>> srcLines;
         std::list<std::string> outLines;
-        bool isModule = false;
-        enum {
-            ADD = 1,
-            SUB,
-            MULT,
-            DIV,
-            JMP,
-            JMPN,
-            JMPP,
-            JMPZ,
-            COPY,
-            LOAD,
-            STORE,
-            INPUT,
-            OUTPUT,
-            STOP,
-            C_INPUT,
-            C_OUTPUT,
-            S_INPUT,
-            S_OUTPUT,
-        };
-        const std::map<std::string, short> opcodeMap = {
-            {"ADD", ADD},
-            {"SUB", SUB},
-            {"MULT", MULT},
-            {"DIV", DIV},
-            {"JMP", JMP},
-            {"JMPN", JMPN},
-            {"JMPP", JMPP},
-            {"JMPZ", JMPZ},
-            {"COPY", COPY},
-            {"LOAD", LOAD},
-            {"STORE", STORE},
-            {"INPUT", INPUT},
-            {"OUTPUT", OUTPUT},
-            {"STOP", STOP},
-            {"C_INPUT", STOP},
-            {"C_OUTPUT", C_OUTPUT},
-            {"S_INPUT", S_INPUT},
-            {"S_OUTPUT", S_OUTPUT},
-        };
-        int error = 0;
+        std::unordered_set<std::string> includeProcedures;
         std::string errMsg;
         std::string genErrMsg(int, std::string);
+        int error = 0;
     public:
         Translator(std::string, std::list<std::tuple<int, std::list<std::string>>>);
         int printSource();
