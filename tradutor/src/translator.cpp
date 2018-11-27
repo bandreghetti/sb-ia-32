@@ -357,23 +357,29 @@ int Translator::translate() {
             std::string procLines;
             if (procedure == "INPUT") {
                 procLines += "INPUT:\n";
-
+                procLines += "enter 0,0\n";
             } else if (procedure == "OUTPUT") {
                 procLines += "OUTPUT:\n";
+                procLines += "enter 0,0\n";
 
             } else if (procedure == "C_INPUT") {
                 procLines += "C_INPUT:\n";
+                procLines += "enter 0,0\n";
 
             } else if (procedure == "C_OUTPUT") {
                 procLines += "C_OUTPUT:\n";
+                procLines += "enter 0,0\n";
 
             } else if (procedure == "S_INPUT") {
                 procLines += "S_INPUT:\n";
+                procLines += "enter 0,0\n";
 
             } else if (procedure == "S_OUTPUT") {
                 procLines += "S_OUTPUT:\n";
+                procLines += "enter 0,0\n";
 
             }
+            procLines += "leave\n";
             procLines += "ret";
             outLines.push_back(procLines);
         }
