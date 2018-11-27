@@ -1,0 +1,11 @@
+SECTION TEXT
+		C_INPUT		CHAR
+        LOAD        CHAR
+        ADD         TOLOWER
+        STORE       CHAR
+        C_OUTPUT    CHAR
+		STOP
+SECTION BSS
+	CHAR:		SPACE
+SECTION DATA
+    TOLOWER:    CONST 32

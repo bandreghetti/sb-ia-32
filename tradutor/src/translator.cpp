@@ -115,7 +115,7 @@ int Translator::translate() {
                 if (nextTokenIt != line.end()) {
                     // Since an argument was given, check if it is valid
                     if (std::regex_match(*nextTokenIt, natRegEx)) {
-                        outLine += ("resd " + std::stoi(*nextTokenIt));
+                        outLine += ("resd " + *nextTokenIt);
                     } else {
                         errMsg = genErrMsg(lineCount, "invalid argument for SPACE directive: " + *nextTokenIt);
                         error = 1;
@@ -358,6 +358,7 @@ int Translator::translate() {
             if (procedure == "INPUT") {
                 procLines += "INPUT:\n";
                 procLines += "enter 0,0\n";
+
             } else if (procedure == "OUTPUT") {
                 procLines += "OUTPUT:\n";
                 procLines += "enter 0,0\n";
